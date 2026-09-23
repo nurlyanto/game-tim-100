@@ -36,7 +36,6 @@
       font-weight: 900; font-size: 12px;
       padding: 4px 12px; border-radius: 999px;
     }
-
     .teams {
       display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch;
       margin: 12px 0; position: sticky; top: 0; z-index: 5;
@@ -62,9 +61,6 @@
       background:#102056; border:2px dashed var(--gold); border-radius:12px; padding:8px;
     }
     .pot-box b { color: var(--gold); font-size: 28px; }
-    .btn-a { background: var(--a); color:#fff; }
-    .btn-b { background: var(--b); color:#fff; }
-
     .question-card {
       background: linear-gradient(180deg, #2444a8, #12225e);
       border: 3px solid var(--gold); border-radius: 18px;
@@ -72,10 +68,9 @@
     }
     .question-card .meta { color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
     .question-card h2 { font-size: clamp(17px, 4.2vw, 24px); margin-top: 6px; line-height: 1.35; }
-
     .board { display: grid; gap: 7px; margin-bottom: 12px; }
     .ans {
-      display: grid; grid-template-columns: 42px 1fr 58px 36px;
+      display: grid; grid-template-columns: 42px 1fr 58px;
       align-items: center; background: #0c1744;
       border: 2px solid #3a56b0; border-radius: 12px; min-height: 50px; overflow: hidden;
     }
@@ -86,14 +81,10 @@
     .ans:not(.revealed) .text::after { content:"••••••••"; color:#7ea0ff; letter-spacing:3px; }
     .ans .pts { text-align:center; font-weight:900; color:var(--gold); font-size:18px; }
     .ans:not(.revealed) .pts { color:#4a63b8; }
-    .ans .openbtn {
-      height:100%; border:0; background:#243a86; color:#ffd54a; font-weight:900; cursor:pointer;
-    }
-
+    .ans .openbtn { display:none; }
     .strikes { display:flex; justify-content:center; gap:10px; min-height:58px; align-items:center; }
     .x { width:48px; height:48px; border:4px solid #ff8a80; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#ff8a80; opacity:.25; }
     .x.on { opacity:1; background:#7f1d1d; color:#fff; border-color:#fff; }
-
     .toast { text-align:center; min-height:26px; font-weight:800; color:var(--gold); margin:4px 0 8px; }
     .controls { display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
     input[type="text"] {
@@ -107,7 +98,6 @@
     .btn-ghost { background:#243a86; color:#fff; border:2px solid #4a63b8; }
     .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
     .row button { flex:1; min-width:120px; }
-
     .overlay {
       position:fixed; inset:0; background:rgba(5,10,30,.9);
       display:flex; align-items:center; justify-content:center; z-index:20; padding:16px;
@@ -121,9 +111,7 @@
     .modal p { margin:8px 0 14px; line-height:1.5; opacity:.92; }
     .hidden { display:none !important; }
     label { display:block; text-align:left; font-size:13px; margin:8px 0 4px; font-weight:800; }
-    select, .modal input {
-      width:100%; padding:10px; border-radius:10px; border:0; font-family:inherit; font-weight:800;
-    }
+    select, .modal input { width:100%; padding:10px; border-radius:10px; border:0; font-family:inherit; font-weight:800; }
     .howto { font-size:13px; text-align:left; background:#0c1744; padding:12px; border-radius:10px; margin-bottom:12px; }
     .howto li { margin:4px 0 4px 18px; }
     footer { text-align:center; opacity:.55; font-size:12px; margin-top:16px; }
@@ -135,6 +123,7 @@
     <header>
       <div class="logo">TIM <span>100</span></div>
       <div class="tag" id="modeTag">KUIS PELAJARAN SD</div>
+      <button class="btn-ghost" id="btnMute" style="margin-top:8px;padding:6px 12px;font-size:12px">🔊 Suara ON</button>
     </header>
 
     <div class="teams">
@@ -194,16 +183,10 @@
         <option value="PKN">PPKn</option>
         <option value="ENG">Bahasa Inggris</option>
       </select>
-      <label>Mode bermain</label>
-      <select id="inMode">
-        <option value="host">Mode Guru / Host (guru yang buka jawaban)</option>
-        <option value="siswa">Mode Siswa (ketik tebakan)</option>
-        <option value="campur">Mode Campur (bisa ketik + buka manual)</option>
-      </select>
       <ul class="howto">
-        <li><b>Mode Guru:</b> tampilkan soal ke kelas, tekan nomor untuk buka jawaban yang benar, tekan X jika salah.</li>
-        <li><b>3 X</b> = giliran pindah / soal bisa direbut tim lawan.</li>
-        <li>Guru pilih tim yang berhak dapat poin ronde.</li>
+        <li>Ketik jawaban lalu tekan TEBAK atau Enter.</li>
+        <li>Poin otomatis masuk ke tim yang sedang giliran.</li>
+        <li>3 X = giliran pindah ke tim lawan.</li>
       </ul>
       <button class="btn-go" id="btnStart" style="width:100%;margin-top:8px">MULAI PERMAINAN</button>
     </div>
@@ -222,18 +205,11 @@
 <script>
 const BANK = [
   { mapel:"IPA", q:"Sebutkan planet dalam tata surya!", answers:[
-    {t:"Merkurius", a:["mercury"], p:16},
-    {t:"Venus", a:[], p:15},
-    {t:"Bumi", a:["earth"], p:18},
-    {t:"Mars", a:[], p:16},
-    {t:"Jupiter", a:[], p:14},
-    {t:"Saturnus", a:["saturn"], p:11},
-    {t:"Uranus", a:[], p:6},
-    {t:"Neptunus", a:["neptune"], p:4}
+    {t:"Merkurius", a:["mercury"], p:16},{t:"Venus", a:[], p:15},{t:"Bumi", a:["earth"], p:18},
+    {t:"Mars", a:[], p:16},{t:"Jupiter", a:[], p:14},{t:"Saturnus", a:["saturn"], p:11},{t:"Uranus", a:[], p:6},{t:"Neptunus", a:["neptune"], p:4}
   ]},
   { mapel:"IPA", q:"Sebutkan bagian tubuh tumbuhan!", answers:[
-    {t:"akar", a:[], p:24},{t:"batang", a:[], p:22},{t:"daun", a:[], p:22},
-    {t:"bunga", a:[], p:16},{t:"buah", a:[], p:10},{t:"biji", a:[], p:6}
+    {t:"akar", a:[], p:24},{t:"batang", a:[], p:22},{t:"daun", a:[], p:22},{t:"bunga", a:[], p:16},{t:"buah", a:[], p:10},{t:"biji", a:[], p:6}
   ]},
   { mapel:"IPA", q:"Sebutkan hewan mamalia!", answers:[
     {t:"sapi", a:[], p:20},{t:"kucing", a:["kucing rumah"], p:18},{t:"anjing", a:[], p:16},
@@ -244,8 +220,7 @@ const BANK = [
     {t:"air", a:["air terjun","sungai"], p:14},{t:"bahan bakar", a:["bensin","minyak","gas"], p:12},{t:"kayu bakar", a:["api"], p:10}
   ]},
   { mapel:"IPA", q:"Sebutkan benda yang termasuk magnet!", answers:[
-    {t:"besi", a:[], p:30},{t:"baja", a:[], p:22},{t:"paku", a:[], p:18},
-    {t:"jarum", a:[], p:16},{t:"kulkas magnet", a:["magnet kulkas"], p:14}
+    {t:"besi", a:[], p:30},{t:"baja", a:[], p:22},{t:"paku", a:[], p:18},{t:"jarum", a:[], p:16},{t:"kulkas magnet", a:["magnet kulkas"], p:14}
   ]},
   { mapel:"IPA", q:"Sebutkan perubahan wujud zat!", answers:[
     {t:"mencair", a:["meleleh"], p:22},{t:"membeku", a:[], p:20},{t:"menguap", a:["penguapan"], p:20},
@@ -262,26 +237,22 @@ const BANK = [
     {t:"hujan", a:["musim hujan"], p:30},{t:"kemarau", a:["kering","panas"], p:28},
     {t:"berawan", a:["mendung"], p:16},{t:"cerah", a:["panas terik"], p:14},{t:"berangin", a:["angin"], p:12}
   ]},
-
   { mapel:"IPS", q:"Sebutkan pulau besar di Indonesia!", answers:[
     {t:"Jawa", a:[], p:24},{t:"Sumatera", a:["sumatra"], p:22},{t:"Kalimantan", a:["borneo"], p:20},
     {t:"Sulawesi", a:[], p:18},{t:"Papua", a:["irian"], p:16}
   ]},
   { mapel:"IPS", q:"Sebutkan arah mata angin!", answers:[
     {t:"utara", a:[], p:22},{t:"selatan", a:[], p:22},{t:"timur", a:[], p:22},{t:"barat", a:[], p:22},
-    {t:"timur laut", a:["northeast"], p:6},{t:"barat daya", a:[], p:6}
+    {t:"timur laut", a:[], p:6},{t:"barat daya", a:[], p:6}
   ]},
   { mapel:"IPS", q:"Sebutkan pekerjaan di masyarakat!", answers:[
     {t:"guru", a:[], p:20},{t:"dokter", a:[], p:18},{t:"petani", a:[], p:16},
     {t:"polisi", a:[], p:14},{t:"nelayan", a:[], p:12},{t:"pedagang", a:["penjual"], p:10},{t:"sopir", a:[], p:10}
   ]},
   { mapel:"IPS", q:"Sebutkan pahlawan nasional Indonesia!", answers:[
-    {t:"Soekarno", a:["sukarno","bung karno"], p:22},
-    {t:"Hatta", a:["moh hatta","bung hatta"], p:18},
-    {t:"Cut Nyak Dien", a:["cut nyak dhien"], p:14},
-    {t:"Diponegoro", a:["pangeran diponegoro"], p:14},
-    {t:"Kartini", a:["ra kartini"], p:16},
-    {t:"Sudirman", a:["jenderal sudirman"], p:16}
+    {t:"Soekarno", a:["sukarno","bung karno"], p:22},{t:"Hatta", a:["moh hatta","bung hatta"], p:18},
+    {t:"Cut Nyak Dien", a:["cut nyak dhien"], p:14},{t:"Diponegoro", a:["pangeran diponegoro"], p:14},
+    {t:"Kartini", a:["ra kartini"], p:16},{t:"Sudirman", a:["jenderal sudirman"], p:16}
   ]},
   { mapel:"IPS", q:"Sebutkan ibu kota provinsi di Indonesia!", answers:[
     {t:"Jakarta", a:["DKI"], p:24},{t:"Bandung", a:[], p:16},{t:"Surabaya", a:[], p:16},
@@ -291,7 +262,6 @@ const BANK = [
     {t:"makanan", a:["pangan","makan"], p:28},{t:"pakaian", a:["sandang","baju"], p:24},
     {t:"tempat tinggal", a:["papan","rumah"], p:24},{t:"pendidikan", a:["sekolah"], p:12},{t:"kesehatan", a:[], p:12}
   ]},
-
   { mapel:"MAT", q:"Sebutkan bangun datar!", answers:[
     {t:"persegi", a:["bujur sangkar"], p:22},{t:"persegi panjang", a:[], p:20},
     {t:"segitiga", a:[], p:18},{t:"lingkaran", a:[], p:16},{t:"trapesium", a:[], p:12},{t:"jajar genjang", a:["jajaran genjang"], p:12}
@@ -312,7 +282,6 @@ const BANK = [
     {t:"1", a:["satu"], p:14},{t:"3", a:["tiga"], p:14},{t:"5", a:["lima"], p:14},
     {t:"7", a:["tujuh"], p:14},{t:"9", a:["sembilan"], p:14},{t:"11", a:["sebelas"], p:10},{t:"13", a:["tiga belas"], p:10},{t:"15", a:["lima belas"], p:10}
   ]},
-
   { mapel:"BIN", q:"Sebutkan tanda baca!", answers:[
     {t:"titik", a:["."], p:24},{t:"koma", a:[","], p:22},{t:"tanda tanya", a:["?"], p:18},
     {t:"tanda seru", a:["!"], p:16},{t:"titik dua", a:[":"], p:10},{t:"tanda petik", a:["petik"], p:10}
@@ -332,7 +301,6 @@ const BANK = [
     {t:"personifikasi", a:[], p:22},{t:"metafora", a:[], p:20},{t:"simile / perumpamaan", a:["simile","perumpamaan","seperti"], p:20},
     {t:"hiperbola", a:[], p:20},{t:"litotes", a:[], p:18}
   ]},
-
   { mapel:"PKN", q:"Sebutkan sila-sila Pancasila!", answers:[
     {t:"Ketuhanan Yang Maha Esa", a:["sila pertama","ketuhanan"], p:22},
     {t:"Kemanusiaan yang adil dan beradab", a:["sila kedua","kemanusiaan"], p:20},
@@ -341,11 +309,8 @@ const BANK = [
     {t:"Keadilan sosial bagi seluruh rakyat Indonesia", a:["sila kelima","keadilan sosial"], p:20}
   ]},
   { mapel:"PKN", q:"Sebutkan contoh sikap gotong royong di sekolah!", answers:[
-    {t:"membersihkan kelas", a:["piknik kelas","bersih kelas"], p:26},
-    {t:"kerja bakti", a:[], p:20},
-    {t:"membantu teman", a:["tolong teman"], p:18},
-    {t:"mengangkat meja bersama", a:["angkat meja"], p:16},
-    {t:"menjaga kebun sekolah", a:["kebun"], p:20}
+    {t:"membersihkan kelas", a:["piknik kelas","bersih kelas"], p:26},{t:"kerja bakti", a:[], p:20},
+    {t:"membantu teman", a:["tolong teman"], p:18},{t:"mengangkat meja bersama", a:["angkat meja"], p:16},{t:"menjaga kebun sekolah", a:["kebun"], p:20}
   ]},
   { mapel:"PKN", q:"Sebutkan hak anak di sekolah!", answers:[
     {t:"hak belajar", a:["belajar"], p:28},{t:"hak bermain", a:["bermain"], p:20},
@@ -356,18 +321,14 @@ const BANK = [
     {t:"Garuda Pancasila", a:["garuda"], p:36},{t:"Bhinneka Tunggal Ika", a:["semboyan"], p:22},
     {t:"perisai Pancasila", a:["perisai"], p:16},{t:"pita hitam", a:["pita"], p:14},{t:"kaki mencengkeram", a:["cakar"], p:12}
   ]},
-
   { mapel:"ENG", q:"Sebutkan warna dalam bahasa Inggris!", answers:[
     {t:"red", a:["merah"], p:18},{t:"blue", a:["biru"], p:16},{t:"green", a:["hijau"], p:16},
     {t:"yellow", a:["kuning"], p:16},{t:"black", a:["hitam"], p:14},{t:"white", a:["putih"], p:12},{t:"orange", a:["oranye"], p:8}
   ]},
   { mapel:"ENG", q:"Sebutkan anggota keluarga dalam bahasa Inggris!", answers:[
-    {t:"father / dad", a:["father","dad","ayah"], p:20},
-    {t:"mother / mom", a:["mother","mom","ibu"], p:20},
-    {t:"brother", a:["kakak laki","adik laki"], p:16},
-    {t:"sister", a:["kakak perempuan","adik perempuan"], p:16},
-    {t:"grandfather", a:["grandpa","kakek"], p:14},
-    {t:"grandmother", a:["grandma","nenek"], p:14}
+    {t:"father / dad", a:["father","dad","ayah"], p:20},{t:"mother / mom", a:["mother","mom","ibu"], p:20},
+    {t:"brother", a:["kakak laki","adik laki"], p:16},{t:"sister", a:["kakak perempuan","adik perempuan"], p:16},
+    {t:"grandfather", a:["grandpa","kakek"], p:14},{t:"grandmother", a:["grandma","nenek"], p:14}
   ]},
   { mapel:"ENG", q:"Sebutkan buah dalam bahasa Inggris!", answers:[
     {t:"apple", a:["apel"], p:20},{t:"banana", a:["pisang"], p:18},{t:"orange", a:["jeruk"], p:16},
@@ -394,8 +355,32 @@ function similar(a,b){
 }
 
 let deck=[], qi=0, turn="A", scoreA=0, scoreB=0, strikes=0, revealed=[], pot=0, mode="campur";
-
+let audioCtx=null, muted=false;
 const el=id=>document.getElementById(id);
+
+function ctx(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended") audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq, dur, type="square", vol=0.08, delay=0){
+  if(muted) return;
+  const c=ctx(), t=c.currentTime+delay;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(vol,t);
+  g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t); o.stop(t+dur+0.02);
+}
+const SFX={
+  correct(){ beep(523,0.09,"square",0.07); beep(659,0.1,"square",0.07,0.09); beep(784,0.18,"square",0.08,0.18); },
+  wrong(){ beep(180,0.22,"sawtooth",0.09); beep(120,0.28,"sawtooth",0.08,0.08); },
+  strike3(){ beep(140,0.15,"square",0.1); beep(140,0.15,"square",0.1,0.18); beep(90,0.35,"sawtooth",0.12,0.36); },
+  next(){ beep(392,0.08,"triangle",0.06); beep(523,0.12,"triangle",0.06,0.1); },
+  start(){ beep(392,0.1); beep(523,0.1,"square",0.07,0.1); beep(659,0.12,"square",0.07,0.2); beep(784,0.2,"square",0.08,0.32); },
+  win(){ [523,659,784,1046].forEach((f,i)=>beep(f,0.16,"square",0.07,i*0.12)); }
+};
 
 function setTurn(t){
   turn=t;
@@ -403,7 +388,6 @@ function setTurn(t){
   el("boxB").classList.toggle("active", t==="B");
   el("turnBadge").innerHTML = "Giliran<br>TIM "+t;
 }
-
 function renderBoard(){
   const item=deck[qi];
   el("board").innerHTML = item.answers.map((ans,i)=>`
@@ -411,19 +395,16 @@ function renderBoard(){
       <div class="num">${i+1}</div>
       <div class="text">${revealed[i]?ans.t:''}</div>
       <div class="pts">${revealed[i]?ans.p:'?'}</div>
-      <button class="openbtn" onclick="reveal(${i})" title="Buka jawaban">${revealed[i]?'✓':'▶'}</button>
     </div>`).join("");
 }
-
 function setStrikes(){
   [1,2,3].forEach(n=>el("x"+n).classList.toggle("on", strikes>=n));
 }
-
 function loadQ(){
   const item=deck[qi];
   revealed=item.answers.map(()=>false);
   strikes=0; pot=0;
-  if(el("potVal")) el("potVal").textContent="0";
+  el("potVal").textContent="0";
   el("question").textContent=item.q;
   el("qmeta").textContent=`${item.mapel} • Soal ${qi+1}/${deck.length} • ${item.answers.length} jawaban`;
   el("toast").textContent="Survey kelas membuktikan... ayo jawab!";
@@ -431,7 +412,6 @@ function loadQ(){
   el("guess").value="";
   if(mode!=="host") el("guess").focus();
 }
-
 function reveal(i){
   const item=deck[qi];
   if(revealed[i]) return;
@@ -444,9 +424,9 @@ function reveal(i){
   el("potVal").textContent=pot;
   const nm = turn==="A" ? el("nameA").textContent : el("nameB").textContent;
   el("toast").textContent=`ADA! ${item.answers[i].t.toUpperCase()} (+${add}) masuk ke ${nm}`;
+  SFX.correct();
   renderBoard();
 }
-
 function tryGuess(){
   const g=el("guess").value.trim();
   if(!g) return;
@@ -461,34 +441,17 @@ function tryGuess(){
   if(matched>=0) reveal(matched);
   else addStrike();
 }
-
 function addStrike(){
   strikes=Math.min(3,strikes+1);
   setStrikes();
   el("toast").textContent = strikes>=3 ? "3X! Tim lawan boleh merebut." : "Tidak ada di papan!";
-  if(strikes>=3) setTurn(turn==="A"?"B":"A");
+  if(strikes>=3){ SFX.strike3(); setTurn(turn==="A"?"B":"A"); }
+  else SFX.wrong();
 }
-
-function awardRound(team){
-  if(!pot){
-    el("toast").textContent="Belum ada poin ronde. Buka jawaban dulu.";
-    return;
-  }
-  const add=pot;
-  if(team==="A") scoreA+=add; else scoreB+=add;
-  el("scoreA").textContent=scoreA;
-  el("scoreB").textContent=scoreB;
-  pot=0;
-  el("potVal").textContent="0";
-  const nm = team==="A" ? el("nameA").textContent : el("nameB").textContent;
-  el("toast").textContent=`${add} poin masuk ke ${nm} (Tim ${team})!`;
-}
-
 function nextQuestion(){
   if(qi>=deck.length-1){ finish(); return; }
-  qi++; setTurn(qi%2===0?"A":"B"); loadQ();
+  qi++; setTurn(qi%2===0?"A":"B"); SFX.next(); loadQ();
 }
-
 function finish(){
   el("endScreen").classList.remove("hidden");
   let win="SERI!";
@@ -496,25 +459,24 @@ function finish(){
   if(scoreB>scoreA) win="TIM B JUARA!";
   el("endTitle").textContent=win;
   el("endText").textContent=`${el("nameA").textContent}: ${scoreA}  •  ${el("nameB").textContent}: ${scoreB}`;
+  SFX.win();
 }
-
 function shuffle(a){ return a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]); }
 
 el("btnStart").onclick=()=>{
   const mapel=el("inMapel").value;
-  mode=el("inMode").value;
+  mode="siswa";
   el("nameA").textContent=el("inA").value||"Tim A";
   el("nameB").textContent=el("inB").value||"Tim B";
   deck = shuffle(BANK.filter(q=> mapel==="campur" || q.mapel===mapel));
   if(!deck.length) deck=shuffle(BANK.slice());
   qi=0; scoreA=0; scoreB=0; setTurn("A");
   el("scoreA").textContent="0"; el("scoreB").textContent="0";
-  el("playerControls").style.display = mode==="host" ? "none" : "flex";
-  el("hostHint").textContent = mode==="host"
-    ? "Mode guru: tekan ▶ di kanan untuk buka jawaban. X untuk salah. Lalu berikan poin ke tim."
-    : "Siswa mengetik jawaban. Guru juga bisa buka manual dengan tombol ▶.";
+  el("playerControls").style.display = "flex";
+  el("hostHint").textContent = "Ketik jawaban siswa, lalu TEBAK. Poin otomatis ke tim yang giliran.";
   el("modeTag").textContent = mapel==="campur" ? "SEMUA MAPEL SD" : "MAPEL "+mapel;
   el("startScreen").classList.add("hidden");
+  SFX.start();
   loadQ();
 };
 el("btnRestart").onclick=()=>{
@@ -524,6 +486,11 @@ el("btnRestart").onclick=()=>{
 el("btnGuess").onclick=tryGuess;
 el("guess").addEventListener("keydown",e=>{ if(e.key==="Enter") tryGuess(); });
 el("btnWrong").onclick=addStrike;
+el("btnMute").onclick=()=>{
+  muted=!muted;
+  el("btnMute").textContent = muted ? "🔇 Suara OFF" : "🔊 Suara ON";
+  if(!muted) SFX.correct();
+};
 </script>
 </body>
 </html>
